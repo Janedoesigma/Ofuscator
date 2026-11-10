@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matheus Obfuscator — Lua, Luau, HTML, Java</title>
+<title>Multi Obfuscator — Lua, Luau, HTML, Java</title>
 <style>
-  :root{--bg-0:#08080a;--bg-1:#0d0d10;--bg-2:#131316;--bg-3:#1a1a1f;--bg-4:#232329;--border:#26262c;--border-soft:#1e1e23;--text:#e4e4e7;--text-dim:#a1a1aa;--text-mute:#52525b;--accent:#d4d4d8;--success:#7ee787;--danger:#ff7b72;--warn:#e3b341}
+  :root{--bg-0:#08080a;--bg-1:#0d0d10;--bg-2:#131316;--bg-3:#1a1a1f;--bg-4:#232329;--border:#26262c;--border-soft:#1e1e23;--text:#e4e4e7;--text-dim:#a1a1aa;--text-mute:#52525b;--accent:#d4d4d8;--success:#7ee787;--danger:#ff7b72;--warn:#e3b341;--gold:#e3b341}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;background:var(--bg-0);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 800px 600px at 15% 0%,rgba(80,80,95,0.12),transparent 60%),radial-gradient(ellipse 700px 500px at 85% 100%,rgba(60,60,72,0.10),transparent 60%);animation:bgShift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
@@ -22,12 +22,21 @@
   .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);background:var(--bg-2);border:1px solid var(--border-soft);padding:5px 10px;border-radius:20px;letter-spacing:0.02em}
   .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse 2s ease-in-out infinite}
-  .pill.author{color:var(--text);border-color:rgba(126,231,135,0.3)}
+  .pill.author{color:var(--text);border-color:rgba(227,179,65,0.3)}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
   main{flex:1;padding:24px 32px 32px;display:flex;flex-direction:column;gap:16px;max-width:1700px;width:100%;margin:0 auto}
 
-  /* ===== LANGUAGE SELECTOR ===== */
-  .lang-bar{display:flex;align-items:stretch;gap:12px;flex-wrap:wrap}
+  .support-banner{display:flex;justify-content:center;margin-top:4px}
+  .support-btn{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;background:linear-gradient(135deg,rgba(227,179,65,0.12),rgba(227,179,65,0.04));border:1px solid rgba(227,179,65,0.35);border-radius:12px;color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600;letter-spacing:0.01em;transition:all .25s ease;position:relative;overflow:hidden;box-shadow:0 0 24px rgba(227,179,65,0.08)}
+  .support-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.06),transparent);opacity:0;transition:opacity .2s}
+  .support-btn:hover{border-color:rgba(227,179,65,0.6);background:linear-gradient(135deg,rgba(227,179,65,0.18),rgba(227,179,65,0.08));transform:translateY(-2px);box-shadow:0 8px 32px rgba(227,179,65,0.2),0 0 40px rgba(227,179,65,0.12)}
+  .support-btn:hover::before{opacity:1}
+  .support-btn:active{transform:translateY(0)}
+  .support-btn svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .support-btn .free-badge{font-size:10px;font-weight:700;letter-spacing:0.08em;padding:2px 6px;background:rgba(227,179,65,0.2);border-radius:4px;margin-left:4px}
+
+  /* FIX: lang-bar must sit above siblings so dropdown is clickable */
+  .lang-bar{display:flex;align-items:stretch;gap:12px;flex-wrap:wrap;position:relative;z-index:50}
   .lang-select{position:relative;flex:1;max-width:420px;min-width:280px}
   .lang-trigger{width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(160deg,var(--bg-2),var(--bg-1));border:1px solid var(--border);border-radius:12px;color:var(--text);cursor:pointer;font-family:inherit;transition:all .2s;position:relative;overflow:hidden}
   .lang-trigger::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)}
@@ -54,8 +63,8 @@
   .lang-option.active .lang-option-check{opacity:1}
   .lang-info{flex:1;min-width:200px;display:flex;align-items:center;padding:0 4px;font-size:12px;color:var(--text-mute);font-family:"SF Mono",Monaco,monospace;letter-spacing:0.01em}
 
-  /* ===== GRID ===== */
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;min-height:420px}
+  /* FIX: keep grid/options below lang-bar */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;min-height:420px;position:relative;z-index:1}
   .panel{background:linear-gradient(160deg,var(--bg-2),var(--bg-1));border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;position:relative;transition:border-color .3s ease}
   .panel:hover{border-color:#2e2e35}
   .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)}
@@ -77,9 +86,7 @@
   .code-view.filled{color:var(--text);font-style:normal}
   .panel-foot{padding:8px 16px;border-top:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-mute);background:rgba(0,0,0,0.15);font-family:"SF Mono",Monaco,monospace;letter-spacing:0.01em}
   .panel-foot .badge{color:var(--text-dim);background:var(--bg-3);padding:2px 7px;border-radius:4px;font-size:10.5px}
-
-  /* ===== OPTIONS ===== */
-  .options-bar{background:linear-gradient(160deg,var(--bg-2),var(--bg-1));border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative}
+  .options-bar{background:linear-gradient(160deg,var(--bg-2),var(--bg-1));border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
   .options-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)}
   .toggles{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1;min-width:0}
   .toggle-group{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1}
@@ -105,8 +112,6 @@
   .run-btn.running svg{animation:spin .8s linear infinite}
   .run-btn:disabled{opacity:.6;cursor:not-allowed}
   @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* ===== DOCS ===== */
   .docs{background:linear-gradient(160deg,var(--bg-2),var(--bg-1));border:1px solid var(--border);border-radius:14px;padding:32px 36px;margin-top:8px;position:relative}
   .docs::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)}
   .docs-hero{display:flex;align-items:center;gap:16px;margin-bottom:8px;padding-bottom:20px;border-bottom:1px solid var(--border-soft)}
@@ -128,17 +133,13 @@
   .docs-callout svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;stroke:var(--warn);fill:none;stroke-width:2}
   .docs-callout.info{background:rgba(88,166,255,0.06);border-color:rgba(88,166,255,0.25);color:#79c0ff}
   .docs-callout.info svg{stroke:#79c0ff}
-
-  /* ===== CREDITS ===== */
   .credits{background:linear-gradient(160deg,var(--bg-3),var(--bg-2));border:1px solid var(--border);border-radius:14px;padding:32px;margin-top:16px;text-align:center;position:relative;overflow:hidden}
   .credits::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)}
-  .credits-glow{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(126,231,135,0.05),transparent 60%);pointer-events:none}
+  .credits-glow{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(227,179,65,0.06),transparent 60%);pointer-events:none}
   .credits-name{font-size:20px;font-weight:600;color:var(--text);margin-bottom:4px;letter-spacing:-0.01em}
   .credits-role{font-size:12px;color:var(--text-mute);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px}
   .credits-copy{font-size:12px;color:var(--text-mute);line-height:1.7;max-width:600px;margin:0 auto}
   .credits-year{color:var(--text-dim)}
-
-  /* ===== TOAST ===== */
   .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(140px);background:var(--bg-3);border:1px solid var(--border);padding:11px 18px;border-radius:10px;font-size:12.5px;display:flex;align-items:center;gap:9px;transition:transform .35s cubic-bezier(0.4,0,0.2,1),opacity .3s;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,0.7);opacity:0;color:var(--text)}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
   .toast svg{width:15px;height:15px;stroke-width:2;fill:none}
@@ -146,11 +147,10 @@
   .toast.success svg{stroke:var(--success)}
   .toast.error{border-color:rgba(255,123,114,0.3)}
   .toast.error svg{stroke:var(--danger)}
-
   @media(max-width:1100px){.toggle{font-size:11px;padding:5px 8px}.toggle .switch{width:20px;height:12px}.toggle .switch::after{width:8px;height:8px}.toggle input:checked+.switch::after{transform:translateX(8px)}}
   @media(max-width:900px){header{padding:14px 18px}main{padding:16px}.grid{grid-template-columns:1fr;min-height:auto}.panel{min-height:300px}.options-bar{padding:14px}.toggles,.toggle-group{width:100%}.run-area{width:100%;justify-content:space-between}.brand-text p{display:none}.lang-select{max-width:100%;width:100%}.docs{padding:24px 20px}}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .panel,.options-bar,.lang-bar{animation:fadeUp .5s cubic-bezier(0.4,0,0.2,1) both}
+  .panel,.options-bar,.lang-bar,.support-banner{animation:fadeUp .5s cubic-bezier(0.4,0,0.2,1) both}
 </style>
 </head>
 <body>
@@ -158,15 +158,22 @@
   <header>
     <div class="brand">
       <div class="brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-      <div class="brand-text"><h1>Matheus Obfuscator</h1><p>Lua · Luau · HTML · Java — ofuscação no navegador</p></div>
+      <div class="brand-text"><h1>Multi Obfuscator</h1><p>Lua · Luau · HTML · Java — obfuscation in the browser</p></div>
     </div>
     <div class="header-right">
       <span class="pill"><span class="dot"></span>client-side</span>
-      <span class="pill author">por Matheus</span>
+      <span class="pill author">by Jane Doe Sigma</span>
     </div>
   </header>
 
   <main>
+    <div class="support-banner">
+      <a href="https://lootdest.org/s?dRfJnMRm" target="_blank" rel="noopener noreferrer" class="support-btn">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span>Support the Creator <span class="free-badge">FREE</span></span>
+      </a>
+    </div>
+
     <div class="lang-bar">
       <div class="lang-select" id="langSelect">
         <button class="lang-trigger" onclick="toggleLangDropdown(event)">
@@ -185,103 +192,102 @@
     <div class="grid">
       <div class="panel">
         <div class="panel-head">
-          <div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Código Original</div>
+          <div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Original Code</div>
           <div class="panel-actions">
-            <button class="icon-btn" data-tip="Carregar exemplo" onclick="loadExample()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
-            <button class="icon-btn" data-tip="Limpar" onclick="clearInput()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+            <button class="icon-btn" data-tip="Load example" onclick="loadExample()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
+            <button class="icon-btn" data-tip="Clear" onclick="clearInput()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
           </div>
         </div>
-        <textarea id="input" placeholder="Cole seu código aqui..."></textarea>
-        <div class="panel-foot"><span id="inStats">0 caracteres · 0 linhas</span></div>
+        <textarea id="input" placeholder="Paste your code here..."></textarea>
+        <div class="panel-foot"><span id="inStats">0 characters · 0 lines</span></div>
       </div>
 
       <div class="panel">
         <div class="panel-head">
-          <div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Código Ofuscado</div>
+          <div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Obfuscated Code</div>
           <div class="panel-actions">
-            <button class="icon-btn" data-tip="Copiar" onclick="copyOutput()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
-            <button class="icon-btn" data-tip="Baixar arquivo" onclick="downloadOutput()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+            <button class="icon-btn" data-tip="Copy" onclick="copyOutput()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            <button class="icon-btn" data-tip="Download file" onclick="downloadOutput()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
           </div>
         </div>
-        <div class="code-view" id="output">Aguardando ofuscação...</div>
-        <div class="panel-foot"><span id="outStats">0 caracteres · 0 linhas</span><span class="badge" id="ratio"></span></div>
+        <div class="code-view" id="output">Waiting for obfuscation...</div>
+        <div class="panel-foot"><span id="outStats">0 characters · 0 lines</span><span class="badge" id="ratio"></span></div>
       </div>
     </div>
 
     <div class="options-bar">
       <div class="toggles">
         <div class="toggle-group" id="toggleGroup-lua">
-          <label class="toggle"><input type="checkbox" id="optComments" checked><span class="switch"></span>Comentários</label>
+          <label class="toggle"><input type="checkbox" id="optComments" checked><span class="switch"></span>Comments</label>
           <label class="toggle"><input type="checkbox" id="optStrings" checked><span class="switch"></span>Pool</label>
-          <label class="toggle"><input type="checkbox" id="optGlobals" checked><span class="switch"></span>Globais</label>
-          <label class="toggle"><input type="checkbox" id="optNumbers" checked><span class="switch"></span>Números</label>
-          <label class="toggle"><input type="checkbox" id="optRename" checked><span class="switch"></span>Renomear</label>
-          <label class="toggle"><input type="checkbox" id="optOpaque" checked><span class="switch"></span>Predicados</label>
+          <label class="toggle"><input type="checkbox" id="optGlobals" checked><span class="switch"></span>Globals</label>
+          <label class="toggle"><input type="checkbox" id="optNumbers" checked><span class="switch"></span>Numbers</label>
+          <label class="toggle"><input type="checkbox" id="optRename" checked><span class="switch"></span>Rename</label>
+          <label class="toggle"><input type="checkbox" id="optOpaque" checked><span class="switch"></span>Predicates</label>
           <label class="toggle"><input type="checkbox" id="optAntiDebug" checked><span class="switch"></span>Anti-Debug</label>
           <label class="toggle"><input type="checkbox" id="optAntiTamper" checked><span class="switch"></span>Anti-Tamper</label>
-          <label class="toggle"><input type="checkbox" id="optMinify" checked><span class="switch"></span>Minificar</label>
-          <label class="toggle"><input type="checkbox" id="optJunk" checked><span class="switch"></span>Ruído</label>
-          <label class="toggle"><input type="checkbox" id="optNested" checked><span class="switch"></span>Ninho</label>
+          <label class="toggle"><input type="checkbox" id="optMinify" checked><span class="switch"></span>Minify</label>
+          <label class="toggle"><input type="checkbox" id="optJunk" checked><span class="switch"></span>Noise</label>
+          <label class="toggle"><input type="checkbox" id="optNested" checked><span class="switch"></span>Nested</label>
           <label class="toggle"><input type="checkbox" id="optWrap" checked><span class="switch"></span>IIFE</label>
         </div>
         <div class="toggle-group" id="toggleGroup-html" style="display:none">
-          <label class="toggle"><input type="checkbox" id="optHtmlComments" checked><span class="switch"></span>Comentários</label>
-          <label class="toggle"><input type="checkbox" id="optHtmlScripts" checked><span class="switch"></span>Encodar Scripts</label>
-          <label class="toggle"><input type="checkbox" id="optHtmlText" checked><span class="switch"></span>Encodar Texto</label>
-          <label class="toggle"><input type="checkbox" id="optHtmlAttrs" checked><span class="switch"></span>Encodar Atributos</label>
-          <label class="toggle"><input type="checkbox" id="optHtmlMinify" checked><span class="switch"></span>Minificar</label>
-          <label class="toggle"><input type="checkbox" id="optHtmlJunk" checked><span class="switch"></span>Ruído</label>
+          <label class="toggle"><input type="checkbox" id="optHtmlComments" checked><span class="switch"></span>Comments</label>
+          <label class="toggle"><input type="checkbox" id="optHtmlScripts" checked><span class="switch"></span>Encode Scripts</label>
+          <label class="toggle"><input type="checkbox" id="optHtmlText" checked><span class="switch"></span>Encode Text</label>
+          <label class="toggle"><input type="checkbox" id="optHtmlAttrs" checked><span class="switch"></span>Encode Attributes</label>
+          <label class="toggle"><input type="checkbox" id="optHtmlMinify" checked><span class="switch"></span>Minify</label>
+          <label class="toggle"><input type="checkbox" id="optHtmlJunk" checked><span class="switch"></span>Noise</label>
         </div>
         <div class="toggle-group" id="toggleGroup-java" style="display:none">
-          <label class="toggle"><input type="checkbox" id="optJavaComments" checked><span class="switch"></span>Comentários</label>
+          <label class="toggle"><input type="checkbox" id="optJavaComments" checked><span class="switch"></span>Comments</label>
           <label class="toggle"><input type="checkbox" id="optJavaStrings" checked><span class="switch"></span>Strings</label>
-          <label class="toggle"><input type="checkbox" id="optJavaNumbers" checked><span class="switch"></span>Números</label>
+          <label class="toggle"><input type="checkbox" id="optJavaNumbers" checked><span class="switch"></span>Numbers</label>
           <label class="toggle"><input type="checkbox" id="optJavaChars" checked><span class="switch"></span>Chars</label>
-          <label class="toggle"><input type="checkbox" id="optJavaMinify" checked><span class="switch"></span>Minificar</label>
+          <label class="toggle"><input type="checkbox" id="optJavaMinify" checked><span class="switch"></span>Minify</label>
         </div>
       </div>
       <div class="run-area">
         <span class="status" id="status"></span>
         <button class="run-btn" id="runBtn" onclick="runObfuscate()">
           <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Ofuscar
+          Obfuscate
         </button>
       </div>
     </div>
 
-    <!-- ===== DOCUMENTAÇÃO ===== -->
     <section class="docs">
       <div class="docs-hero">
         <div class="docs-hero-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
         <div>
-          <h2>Documentação</h2>
-          <p>Tudo o que você precisa para usar, hospedar e entender o obfuscador</p>
+          <h2>Documentation</h2>
+          <p>Everything you need to use, host, and understand Multi Obfuscator</p>
         </div>
       </div>
 
-      <h3>Como usar</h3>
+      <h3>How to use</h3>
       <ol>
-        <li>Selecione a <strong>linguagem</strong> no menu dropdown acima (Lua, Luau, HTML ou Java)</li>
-        <li>Cole seu código no painel esquerdo (ou clique no raio <code>⚡</code> para carregar um exemplo)</li>
-        <li>Ajuste as opções de ofuscação — cada linguagem tem seu conjunto de técnicas</li>
-        <li>Clique em <strong>Ofuscar</strong> (ou pressione <code>Ctrl+Enter</code>)</li>
-        <li>Copie o resultado com o botão de cópia ou baixe como arquivo</li>
+        <li>Select the <strong>language</strong> from the dropdown above (Lua, Luau, HTML, or Java)</li>
+        <li>Paste your code in the left panel (or click the lightning icon to load an example)</li>
+        <li>Adjust the obfuscation options — each language has its own set of techniques</li>
+        <li>Click <strong>Obfuscate</strong> (or press <code>Ctrl+Enter</code>)</li>
+        <li>Copy the result with the copy button or download it as a file</li>
       </ol>
 
-      <h3>Formatos suportados</h3>
+      <h3>Supported formats</h3>
       <div class="docs-grid">
         <div>
-          <p><strong>Lua 5.1</strong> — Renomear variáveis com escopo correto, pool criptografado de strings, env wrapping de globais, predicados opacos, anti-debug, anti-tamper, números como expressões, ruído, aninhamento e IIFE.</p>
-          <p style="margin-top:10px"><strong>Luau</strong> — Tudo do Lua + suporte a tipos (<code>type</code>, <code>export type</code>), compound ops (<code>+=</code>, <code>-=</code>, <code>..=</code>), <code>continue</code>, string interpolation com backticks e binários <code>0b</code>. Detectado automaticamente.</p>
+          <p><strong>Lua 5.1</strong> — Variable renaming with proper scope handling, encrypted string pool, global env wrapping, opaque predicates, anti-debug, anti-tamper, numbers as expressions, noise, nesting, and IIFE.</p>
+          <p style="margin-top:10px"><strong>Luau</strong> — Everything from Lua + support for type annotations (<code>type</code>, <code>export type</code>), compound ops (<code>+=</code>, <code>-=</code>, <code>..=</code>), <code>continue</code>, backtick string interpolation, and <code>0b</code> binaries. Detected automatically.</p>
         </div>
         <div>
-          <p><strong>HTML</strong> — Remove comentários, codifica conteúdo de <code>&lt;script&gt;</code> em bytes e executa via <code>eval</code> + <code>TextDecoder</code>, codifica texto em entidades HTML, codifica atributos, minifica e injeta elementos invisíveis de ruído.</p>
-          <p style="margin-top:10px"><strong>Java</strong> — Remove comentários, converte strings em <code>new String(new char[]{...})</code>, ofusca números como expressões, codifica chars e minifica sem quebrar tokens.</p>
+          <p><strong>HTML</strong> — Removes comments, encodes <code>&lt;script&gt;</code> content as bytes and runs it via <code>eval</code> + <code>TextDecoder</code>, encodes text as HTML entities, encodes attributes, minifies, and injects invisible noise elements.</p>
+          <p style="margin-top:10px"><strong>Java</strong> — Removes comments, converts strings to <code>new String(new char[]{...})</code>, obfuscates numbers as expressions, encodes chars, and minifies without breaking tokens.</p>
         </div>
       </div>
 
-      <h3>Como servir localmente</h3>
-      <p>Como o arquivo é um único <code>.html</code>, você pode simplesmente abri-lo no navegador. Mas para servir via HTTP (necessário para algumas APIs como clipboard em alguns contextos):</p>
+      <h3>Serving locally</h3>
+      <p>Since the file is a single <code>.html</code>, you can simply open it in your browser. To serve over HTTP:</p>
       <pre><code># Python 3
 python -m http.server 8000
 
@@ -290,49 +296,47 @@ npx serve .
 
 # PHP
 php -S localhost:8000</code></pre>
-      <p>Depois acesse <code>http://localhost:8000/obfuscator.html</code> no navegador.</p>
+      <p>Then open <code>http://localhost:8000/obfuscator.html</code> in your browser.</p>
 
-      <h3>Como hospedar em produção</h3>
+      <h3>Hosting in production</h3>
       <ul>
-        <li><strong>GitHub Pages</strong> — Crie um repositório, faça upload do <code>.html</code>, ative Pages em Settings → Pages</li>
-        <li><strong>Netlify</strong> — Arraste o arquivo para <code>app.netlify.com/drop</code></li>
-        <li><strong>Vercel</strong> — <code>vercel --prod</code> ou arraste na dashboard</li>
-        <li><strong>Cloudflare Pages</strong> — Upload direto pelo painel</li>
-        <li><strong>Qualquer hosting estático</strong> — Basta colocar o arquivo em qualquer servidor web</li>
+        <li><strong>GitHub Pages</strong> — Create a repo, upload the <code>.html</code>, enable Pages in Settings → Pages</li>
+        <li><strong>Netlify</strong> — Drag the file into <code>app.netlify.com/drop</code></li>
+        <li><strong>Vercel</strong> — <code>vercel --prod</code> or drag it into the dashboard</li>
+        <li><strong>Cloudflare Pages</strong> — Upload directly from the panel</li>
+        <li><strong>Any static hosting</strong> — Just drop the file on any web server</li>
       </ul>
 
-      <h3>Segurança e privacidade</h3>
+      <h3>Security and privacy</h3>
       <div class="docs-callout info">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg>
-        <div>Todo processamento acontece <strong>100% no seu navegador</strong>. Nenhum código é enviado para servidor algum. Você pode usar offline desconectando a internet. Não há analytics, cookies, trackers ou chamadas externas.</div>
+        <div>All processing happens <strong>100% in your browser</strong>. No code is ever sent to a server. You can use it offline by disconnecting from the internet. There are no analytics, cookies, trackers, or external calls.</div>
       </div>
 
-      <h3>Limitações importantes</h3>
+      <h3>Known limitations</h3>
       <div class="docs-callout">
         <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01" stroke-linecap="round"/></svg>
         <div>
-          <strong>HTML:</strong> Scripts que usam <code>let</code>/<code>const</code> no escopo global podem perder referência após a codificação, pois <code>eval</code> cria um escopo próprio.<br><br>
-          <strong>Java:</strong> Renomeação de variáveis não está disponível — exigiria AST parser completo para preservar semântica.<br><br>
-          <strong>Lua/Luau:</strong> Control Flow Flattening e VM Obfuscation (usados por Luraph/IronBrew) não estão inclusos — exigem interpretador Lua embutido.
+          <strong>HTML:</strong> Scripts using <code>let</code>/<code>const</code> at global scope may lose reference after encoding, because <code>eval</code> creates its own scope.<br><br>
+          <strong>Java:</strong> Variable renaming is not available — it would require a full AST parser.<br><br>
+          <strong>Lua/Luau:</strong> Control Flow Flattening and VM Obfuscation (used by Luraph/IronBrew) are not included — they require an embedded Lua interpreter.
         </div>
       </div>
 
-      <h3>Atalhos de teclado</h3>
+      <h3>Keyboard shortcuts</h3>
       <ul>
-        <li><code>Ctrl + Enter</code> ou <code>Cmd + Enter</code> — Ofuscar código</li>
-        <li><code>Ctrl + C</code> — Copiar saída (quando o botão de cópia está focado)</li>
+        <li><code>Ctrl + Enter</code> or <code>Cmd + Enter</code> — Obfuscate</li>
       </ul>
     </section>
 
-    <!-- ===== CRÉDITOS ===== -->
     <div class="credits">
       <div class="credits-glow"></div>
-      <div class="credits-name">Matheus</div>
-      <div class="credits-role">Criador e Desenvolvedor</div>
+      <div class="credits-name">Jane Doe Sigma</div>
+      <div class="credits-role">Creator &amp; Developer</div>
       <div class="credits-copy">
-        Este projeto foi integralmente idealizado, projetado e desenvolvido por <strong>Matheus</strong>.<br>
-        Todos os direitos autorais reservados © <span class="credits-year" id="year"></span>.<br>
-        Reprodução, distribuição ou uso comercial sem autorização expressa do autor é proibida.
+        <strong>Multi Obfuscator</strong> was fully conceived, designed, and developed by <strong>Jane Doe Sigma</strong>.<br>
+        All rights reserved © <span class="credits-year" id="year"></span>.<br>
+        Reproduction, distribution, or commercial use without express permission is prohibited.
       </div>
     </div>
   </main>
@@ -344,156 +348,105 @@ php -S localhost:8000</code></pre>
 </div>
 
 <script>
-/* ============================================================
-   ÍCONES SVG DAS LINGUAGENS
-   ============================================================ */
 const ICONS = {
-  lua: `<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="13" r="7" stroke="#51A0D5" stroke-width="1.8"/><circle cx="17" cy="7" r="2.5" fill="#51A0D5"/></svg>`,
-  luau: `<svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2 L21 9 L18 20 L6 20 L3 9 Z"/><circle cx="12" cy="12" r="3" fill="#a78bfa" stroke="none"/></svg>`,
-  html: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 3 L6 20 L12 22 L18 20 L20 3 Z" stroke="#e34c26" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 8 H16 M9 12 H15 M10 16 L12 17 L14 16" stroke="#f06529" stroke-width="1.5" stroke-linecap="round"/></svg>`,
-  java: `<svg viewBox="0 0 24 24" fill="none" stroke="#f89820" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10 H16 V16 C16 18 14 20 11 20 C8 20 6 18 6 16 Z"/><path d="M16 12 H18 C19.1 12 20 12.9 20 14 C20 15.1 19.1 16 18 16 H16"/><path d="M9 3 C9.5 4 10.5 5 9.5 6 M13 2 C13.5 3 14.5 4 13.5 5"/></svg>`
+  lua: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="13" r="7" stroke="#51A0D5" stroke-width="1.8"/><circle cx="17" cy="7" r="2.5" fill="#51A0D5"/></svg>',
+  luau: '<svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2 L21 9 L18 20 L6 20 L3 9 Z"/><circle cx="12" cy="12" r="3" fill="#a78bfa" stroke="none"/></svg>',
+  html: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 3 L6 20 L12 22 L18 20 L20 3 Z" stroke="#e34c26" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 8 H16 M9 12 H15 M10 16 L12 17 L14 16" stroke="#f06529" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  java: '<svg viewBox="0 0 24 24" fill="none" stroke="#f89820" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10 H16 V16 C16 18 14 20 11 20 C8 20 6 18 6 16 Z"/><path d="M16 12 H18 C19.1 12 20 12.9 20 14 C20 15.1 19.1 16 18 16 H16"/><path d="M9 3 C9.5 4 10.5 5 9.5 6 M13 2 C13.5 3 14.5 4 13.5 5"/></svg>'
 };
 
-/* ============================================================
-   CONFIGURAÇÃO DE LINGUAGENS
-   ============================================================ */
-const EXAMPLE_LUA = `-- Exemplo de código Lua 5.1
-local function calcular(a, b)
-  local resultado = a + b
-  print("A soma é: " .. resultado)
-  return resultado
-end
+const EXAMPLE_LUA = '-- Example Lua 5.1 code\n' +
+'local function calculate(a, b)\n' +
+'  local result = a + b\n' +
+'  print("The sum is: " .. result)\n' +
+'  return result\n' +
+'end\n\n' +
+'local total = calculate(10, 20)\n' +
+'for i = 1, 5 do\n' +
+'  print(i, "squared is", i * i)\n' +
+'end\n\n' +
+'local t = { name = "Lua", version = 5.4 }\n' +
+'if t.version >= 5 then\n' +
+'  print("Modern version of " .. t.name)\n' +
+'else\n' +
+'  print("Old version")\n' +
+'end';
 
-local total = calcular(10, 20)
-for i = 1, 5 do
-  print(i, "ao quadrado é", i * i)
-end
+const EXAMPLE_LUAU = '-- Example Luau (Roblox) code\n' +
+'type Point = { x: number, y: number }\n' +
+'export type Vec = Point\n\n' +
+'local function calculate(a: number, b: number): number\n' +
+'  local result: number = a + b\n' +
+'  print("The sum is: " .. tostring(result))\n' +
+'  return result\n' +
+'end\n\n' +
+'local total: number = calculate(10, 20)\n' +
+'print("Total: " .. tostring(total) .. "!")\n\n' +
+'local p: Point = { x = 1, y = 2 }\n' +
+'p.x += 5\n' +
+'p.y -= 1\n\n' +
+'for i = 1, 5 do\n' +
+'  if i == 3 then continue end\n' +
+'  print(i, "squared is", i * i)\n' +
+'end';
 
-local t = { nome = "Lua", versao = 5.4 }
-if t.versao >= 5 then
-  print("Versão moderna de " .. t.nome)
-else
-  print("Versão antiga")
-end`;
+/* Escaped \x3c/\x3e so it doesn't close the main <script> tag */
+const EXAMPLE_HTML = '\x3c!DOCTYPE html>\n' +
+'\x3chtml lang="en">\n' +
+'\x3chead>\n' +
+'  \x3cmeta charset="UTF-8">\n' +
+'  \x3ctitle>Example\x3c/title>\n' +
+'\x3c/head>\n' +
+'\x3cbody>\n' +
+'  \x3cdiv id="app" class="container">\n' +
+'    \x3ch1 id="title">Hello World\x3c/h1>\n' +
+'    \x3cp class="description">A simple HTML page example.\x3c/p>\n' +
+'    \x3cbutton class="btn primary" onclick="alert(\'Clicked!\')">Click here\x3c/button>\n' +
+'  \x3c/div>\n\n' +
+'  \x3cscript>\n' +
+'    document.getElementById(\'title\').style.color = \'red\';\n' +
+'    console.log(\'Script loaded successfully\');\n' +
+'  \x3c/script>\n' +
+'\x3c/body>\n' +
+'\x3c/html>';
 
-const EXAMPLE_LUAU = `-- Exemplo de código Luau (Roblox)
-type Point = { x: number, y: number }
-export type Vec = Point
-
-local function calcular(a: number, b: number): number
-  local resultado: number = a + b
-  print("A soma é: " .. tostring(resultado))
-  return resultado
-end
-
-local total: number = calcular(10, 20)
-print(\`Total: {total}!\`)
-
-local p: Point = { x = 1, y = 2 }
-p.x += 5
-p.y -= 1
-
-for i = 1, 5 do
-  if i == 3 then continue end
-  print(i, "ao quadrado é", i * i)
-end`;
-
-const EXAMPLE_HTML = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Exemplo</title>
-</head>
-<body>
-  <div id="app" class="container">
-    <h1 id="title">Olá Mundo</h1>
-    <p class="descricao">Um exemplo simples de página HTML.</p>
-    <button class="btn primary" onclick="alert('Clicou!')">Clique aqui</button>
-  </div>
-
-  <script>
-    document.getElementById('title').style.color = 'red';
-    console.log('Script carregado com sucesso');
-  </script>
-</body>
-</html>`;
-
-const EXAMPLE_JAVA = `// Exemplo de código Java
-public class Hello {
-  private static final int LIMITE = 10;
-  
-  public static void main(String[] args) {
-    String nome = "Mundo";
-    int contador = 5;
-    
-    System.out.println("Olá, " + nome + "!");
-    
-    for (int i = 0; i < contador; i++) {
-      System.out.println("Iteração: " + i);
-    }
-    
-    if (contador > 3) {
-      System.out.println("Contador maior que 3");
-    }
-  }
-}`;
+const EXAMPLE_JAVA = '// Example Java code\n' +
+'public class Hello {\n' +
+'  private static final int LIMIT = 10;\n\n' +
+'  public static void main(String[] args) {\n' +
+'    String name = "World";\n' +
+'    int counter = 5;\n\n' +
+'    System.out.println("Hello, " + name + "!");\n\n' +
+'    for (int i = 0; i < counter; i++) {\n' +
+'      System.out.println("Iteration: " + i);\n' +
+'    }\n\n' +
+'    if (counter > 3) {\n' +
+'      System.out.println("Counter is greater than 3");\n' +
+'    }\n' +
+'  }\n' +
+'}';
 
 const LANGS = {
-  lua: {
-    name: 'Lua 5.1',
-    desc: 'Ofuscação completa para Lua padrão',
-    icon: ICONS.lua,
-    example: EXAMPLE_LUA,
-    ext: '.lua',
-    info: 'Lua 5.1 · pool criptografado · anti-debug',
-    toggleGroup: 'lua'
-  },
-  luau: {
-    name: 'Luau',
-    desc: 'Roblox Luau com tipos e compound ops',
-    icon: ICONS.luau,
-    example: EXAMPLE_LUAU,
-    ext: '.luau',
-    info: 'Luau · tipos preservados · interpolação',
-    toggleGroup: 'lua'
-  },
-  html: {
-    name: 'HTML / JavaScript',
-    desc: 'Páginas HTML com scripts codificados',
-    icon: ICONS.html,
-    example: EXAMPLE_HTML,
-    ext: '.html',
-    info: 'HTML · scripts em bytes · entidades',
-    toggleGroup: 'html'
-  },
-  java: {
-    name: 'Java',
-    desc: 'Código-fonte Java (.java)',
-    icon: ICONS.java,
-    example: EXAMPLE_JAVA,
-    ext: '.java',
-    info: 'Java · strings em char[] · números',
-    toggleGroup: 'java'
-  }
+  lua: { name: 'Lua 5.1', desc: 'Full obfuscation for standard Lua', icon: ICONS.lua, example: EXAMPLE_LUA, ext: '.lua', info: 'Lua 5.1 · encrypted pool · anti-debug', toggleGroup: 'lua' },
+  luau: { name: 'Luau', desc: 'Roblox Luau with types and compound ops', icon: ICONS.luau, example: EXAMPLE_LUAU, ext: '.luau', info: 'Luau · types preserved · interpolation', toggleGroup: 'lua' },
+  html: { name: 'HTML / JavaScript', desc: 'HTML pages with encoded scripts', icon: ICONS.html, example: EXAMPLE_HTML, ext: '.html', info: 'HTML · scripts as bytes · entities', toggleGroup: 'html' },
+  java: { name: 'Java', desc: 'Java source code (.java)', icon: ICONS.java, example: EXAMPLE_JAVA, ext: '.java', info: 'Java · strings as char[] · numbers', toggleGroup: 'java' }
 };
 
 let currentLang = 'lua';
 
-/* ============================================================
-   DROPDOWN
-   ============================================================ */
 function renderDropdown() {
   const dd = document.getElementById('langDropdown');
-  dd.innerHTML = Object.entries(LANGS).map(([key, cfg]) => `
-    <button class="lang-option ${key === currentLang ? 'active' : ''}" data-lang="${key}" onclick="selectLang('${key}')">
-      <span class="lang-option-icon">${cfg.icon}</span>
-      <span class="lang-option-text">
-        <span class="lang-option-name">${cfg.name}</span>
-        <span class="lang-option-desc">${cfg.desc}</span>
-      </span>
-      <svg class="lang-option-check" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-    </button>
-  `).join('');
+  dd.innerHTML = Object.entries(LANGS).map(([key, cfg]) =>
+    '<button class="lang-option ' + (key === currentLang ? 'active' : '') + '" data-lang="' + key + '" onclick="selectLang(\'' + key + '\')">' +
+      '<span class="lang-option-icon">' + cfg.icon + '</span>' +
+      '<span class="lang-option-text">' +
+        '<span class="lang-option-name">' + cfg.name + '</span>' +
+        '<span class="lang-option-desc">' + cfg.desc + '</span>' +
+      '</span>' +
+      '<svg class="lang-option-check" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' +
+    '</button>'
+  ).join('');
 }
 
 function toggleLangDropdown(e) {
@@ -506,9 +459,7 @@ function closeLangDropdown() {
 }
 
 document.addEventListener('click', (e) => {
-  if (!document.getElementById('langSelect').contains(e.target)) {
-    closeLangDropdown();
-  }
+  if (!document.getElementById('langSelect').contains(e.target)) closeLangDropdown();
 });
 
 function selectLang(lang) {
@@ -530,13 +481,13 @@ function selectLang(lang) {
 
   const input = document.getElementById('input');
   input.value = cfg.example;
-  input.placeholder = `Cole seu código ${cfg.name} aqui...`;
+  input.placeholder = 'Paste your ' + cfg.name + ' code here...';
   updateInStats();
 
   const output = document.getElementById('output');
-  output.textContent = 'Aguardando ofuscação...';
+  output.textContent = 'Waiting for obfuscation...';
   output.classList.remove('filled');
-  document.getElementById('outStats').textContent = '0 caracteres · 0 linhas';
+  document.getElementById('outStats').textContent = '0 characters · 0 lines';
   document.getElementById('ratio').textContent = '';
 
   closeLangDropdown();
@@ -546,9 +497,7 @@ function selectLang(lang) {
   }, 300);
 }
 
-/* ============================================================
-   TOKENIZER LUA / LUAU
-   ============================================================ */
+/* ============ LUA/LUAU TOKENIZER ============ */
 function tokenizeLua(code){
   const tokens=[];let i=0;const n=code.length;
   const tryLongBracket=(pos)=>{
@@ -614,10 +563,6 @@ function decodeLuaString(raw){
   }
   return out
 }
-
-/* ============================================================
-   NOMES + KEYWORDS
-   ============================================================ */
 const _usedNames=new Set();
 function randHexName(){
   let n,guard=0;
@@ -647,10 +592,6 @@ function detectLuau(tokens){
   }
   return false
 }
-
-/* ============================================================
-   RENOMEAR LOCAIS (Lua/Luau)
-   ============================================================ */
 function renameLocals(tokens,luau){
   const scopes=[{vars:new Map(),parent:null}];
   const push=()=>scopes.push({vars:new Map(),parent:scopes[scopes.length-1]});
@@ -659,7 +600,6 @@ function renameLocals(tokens,luau){
   const lookup=(name)=>{let s=scopes[scopes.length-1];while(s){if(s.vars.has(name))return s.vars.get(name);s=s.parent}return null};
   const isM=(t)=>t&&t.type!=='ws'&&t.type!=='comment';
   const nextM=(idx)=>{idx++;while(idx<tokens.length&&!isM(tokens[idx]))idx++;return idx};
-
   function skipType(idx){
     let depth=0,j=idx+1;
     while(j<tokens.length){
@@ -676,15 +616,12 @@ function renameLocals(tokens,luau){
     for(let k=idx;k<j;k++)tokens[k]._protected=true;
     return j
   }
-
   const output=tokens.slice();
   let localFlag=false,forHeader=null;
-
   for(let i=0;i<tokens.length;i++){
     const tok=tokens[i];
     if(tok._protected)continue;
     if(!isM(tok))continue;
-
     if(luau&&tok.type==='name'&&tok.value==='type'){
       let depth=0,j=i+1,sawEq=false;
       while(j<tokens.length){
@@ -702,7 +639,6 @@ function renameLocals(tokens,luau){
       for(let k=i;k<j;k++)tokens[k]._protected=true;
       i=j-1;continue
     }
-
     if(localFlag){
       if(tok.value==='function'){
         const ni=nextM(i);
@@ -717,7 +653,6 @@ function renameLocals(tokens,luau){
         localFlag=false;i=ni-1;continue
       }else{localFlag=false}
     }
-
     if(forHeader&&forHeader.depth===scopes.length){
       if(tok.value==='do'){push();for(const v of forHeader.vars)output[v.idx]={...output[v.idx],value:declare(v.name)};forHeader=null;continue}
       if(forHeader.collecting){
@@ -725,7 +660,6 @@ function renameLocals(tokens,luau){
         if(tok.value==='='||tok.value==='in'){forHeader.collecting=false;continue}
       }
     }
-
     if(tok.type==='name'&&LUA_KEYWORDS.has(tok.value)){
       switch(tok.value){
         case 'local':localFlag=true;continue;
@@ -777,15 +711,10 @@ function renameLocals(tokens,luau){
         default:continue
       }
     }
-
     if(tok.type==='name'){const nn=lookup(tok.value);if(nn)output[i]={...tok,value:nn}}
   }
   return output
 }
-
-/* ============================================================
-   NÚMEROS, PREDICADOS, GLOBAIS (Lua/Luau)
-   ============================================================ */
 function obfuscateNumbers(tokens){
   for(const t of tokens){
     if(t._protected||t.type!=='number')continue;
@@ -793,10 +722,10 @@ function obfuscateNumbers(tokens){
     const n=parseInt(t.value,10);
     if(n<0||n>1e7)continue;
     const style=Math.floor(Math.random()*4);let expr;
-    if(style===0){const r=1+Math.floor(Math.random()*500);expr=`(${n}+${r}-${r})`}
-    else if(style===1){const r=2+Math.floor(Math.random()*500);expr=`(${n+r}-${r})`}
-    else if(style===2){const r=1+Math.floor(Math.random()*500);expr=`(${r}+${n}-${r})`}
-    else{const r=1+Math.floor(Math.random()*500);expr=`(${r}-(${r}-${n}))`}
+    if(style===0){const r=1+Math.floor(Math.random()*500);expr='('+n+'+'+r+'-'+r+')'}
+    else if(style===1){const r=2+Math.floor(Math.random()*500);expr='('+(n+r)+'-'+r+')'}
+    else if(style===2){const r=1+Math.floor(Math.random()*500);expr='('+r+'+'+n+'-'+r+')'}
+    else{const r=1+Math.floor(Math.random()*500);expr='('+r+'-('+r+'-'+n+'))'}
     t.value=expr
   }
   return tokens
@@ -843,7 +772,7 @@ function wrapGlobals(tokens,addToPool,decName,envName){
     if(t.type==='op'){if(t.value==='{')braceDepth++;else if(t.value==='}')braceDepth=Math.max(0,braceDepth-1)}
     if(t.type==='name'&&KNOWN_GLOBALS.has(t.value)){
       const skip=(prevM&&(prevM.value==='.'||prevM.value===':'||prevM.value==='function'))||(braceDepth>0&&nextIsEq(i));
-      if(!skip){const idx=addToPool(t.value);t.encoded=`${envName}[${decName}(${idx})]`}
+      if(!skip){const idx=addToPool(t.value);t.encoded=envName+'['+decName+'('+idx+')]'}
     }
     prevM=t
   }
@@ -883,13 +812,13 @@ function addJunkCode(code){
     const kind=Math.floor(Math.random()*7);
     const n1=randHexName(),n2=randHexName();
     switch(kind){
-      case 0:lines.push(`local ${n1}=${Math.floor(Math.random()*1000)} `);break;
-      case 1:lines.push(`do local ${n1}={${Math.floor(Math.random()*100)},"${Math.random().toString(36).slice(2,8)}"} local _=#${n1} end `);break;
-      case 2:lines.push(`do local ${n1}=function(${n2})return ${n2}+${Math.floor(Math.random()*50)} end local _=${n1}(${Math.floor(Math.random()*50)}) end `);break;
-      case 3:lines.push(`local ${n1}=${Math.floor(Math.random()*100)} if ${n1}>${Math.floor(Math.random()*100)} then ${n1}=${n1}-1 end `);break;
-      case 4:lines.push(`do local ${n1}="" local ${n2}=#${n1} end `);break;
-      case 5:lines.push(`local ${n1}=({})[1] if ${n1}==nil then ${n1}=0 end `);break;
-      case 6:lines.push(`do for ${n1}=1,${Math.floor(Math.random()*5)+1} do local ${n2}=${n1}*2 end end `);break
+      case 0:lines.push('local '+n1+'='+Math.floor(Math.random()*1000)+' ');break;
+      case 1:lines.push('do local '+n1+'={'+Math.floor(Math.random()*100)+',"'+Math.random().toString(36).slice(2,8)+'"} local _=#'+n1+' end ');break;
+      case 2:lines.push('do local '+n1+'=function('+n2+')return '+n2+'+'+Math.floor(Math.random()*50)+' end local _='+n1+'('+Math.floor(Math.random()*50)+') end ');break;
+      case 3:lines.push('local '+n1+'='+Math.floor(Math.random()*100)+' if '+n1+'>'+Math.floor(Math.random()*100)+' then '+n1+'='+n1+'-1 end ');break;
+      case 4:lines.push('do local '+n1+'="" local '+n2+'=#'+n1+' end ');break;
+      case 5:lines.push('local '+n1+'=({})[1] if '+n1+'==nil then '+n1+'=0 end ');break;
+      case 6:lines.push('do for '+n1+'=1,'+(Math.floor(Math.random()*5)+1)+' do local '+n2+'='+n1+'*2 end end ');break
     }
   }
   return lines.join('')+code
@@ -898,25 +827,19 @@ function wrapInDoBlocks(code,levels){
   let wrapped=code;
   for(let i=0;i<levels;i++){
     const j=randHexName();
-    wrapped=`do local ${j}=${Math.floor(Math.random()*1000)} ${wrapped} end `
+    wrapped='do local '+j+'='+Math.floor(Math.random()*1000)+' '+wrapped+' end '
   }
   return wrapped
 }
-function wrapIIFE(code){return `;(function(...)${code}end)(...)`}
+function wrapIIFE(code){return ';(function(...)'+code+'end)(...)'}
 
-/* ============================================================
-   PIPELINE LUA/LUAU
-   ============================================================ */
 function obfuscateLua(source,opts){
   let tokens=tokenizeLua(source);
   if(opts.removeComments)tokens=tokens.filter(t=>t.type!=='comment');
-
   const isLuau=opts.luauMode||detectLuau(tokens);
-
   if(opts.renameVars)tokens=renameLocals(tokens,isLuau);
   if(opts.opaquePredicates)tokens=addOpaquePredicates(tokens);
   if(opts.encodeNumbers)tokens=obfuscateNumbers(tokens);
-
   const keysArr=[],offsetsArr=[];
   const lookup=new Map();
   let poolText='',poolPos=1;
@@ -931,21 +854,17 @@ function obfuscateLua(source,opts){
     poolText+=enc;poolPos+=bytes.length;
     return idx
   };
-
   const decName=randHexName();
   const envName=randHexName();
-
   if(opts.encodeStrings)for(const t of tokens){
     if(t._protected||t.type!=='string')continue;
     const idx=addToPool(t.content);
-    t.encoded=`${decName}(${idx})`
+    t.encoded=decName+'('+idx+')'
   }
   if(opts.wrapGlobals)wrapGlobals(tokens,addToPool,decName,envName);
-
   let body=opts.minify?minifyTokens(tokens):tokens.map(tokenVal).join('');
   if(opts.addJunk)body=addJunkCode(body);
   if(opts.nestedDo)body=wrapInDoBlocks(body,2+Math.floor(Math.random()*2));
-
   let prefix='';
   if(keysArr.length>0){
     const subName=randHexName(),byteName=randHexName(),charName=randHexName();
@@ -956,82 +875,60 @@ function obfuscateLua(source,opts){
     const poolName=randHexName(),keysName=randHexName(),offsName=randHexName();
     let cs=0;const re=/\\(\d{3})/g;let m;
     while((m=re.exec(poolText))!==null)cs=(cs+parseInt(m[1],10))%251;
-    prefix+=`local ${envName}=_ENV or _G `;
-    prefix+=`local ${subName},${byteName},${charName}=("").sub,("").byte,("").char `;
-    prefix+=`local ${poolName}="${poolText}" `;
-    prefix+=`local ${keysName}={${keysArr.join(',')}} `;
-    prefix+=`local ${offsName}={${offsetsArr.join(',')}} `;
-    if(opts.antiDebug)prefix+=`do local ${okName},${hkName},${mkName}=pcall(function()return debug and debug.gethook and debug.gethook()end)if ${okName} and ${hkName} and type(${mkName})=="string" and #${mkName}>0 then do return end end end `;
-    if(opts.antiTamper)prefix+=`do local ${sumName}=0 for ${siName}=1,#${poolName} do ${sumName}=(${sumName}+${byteName}(${poolName},${siName}))%251 end if ${sumName}~=${cs} then do return end end end `;
-    prefix+=`local function ${decName}(${idxName}) local ${posName},${lenName}=${offsName}[${idxName}*2-1],${offsName}[${idxName}*2] local ${keyName}=${keysName}[${idxName}] local ${strName}=${subName}(${poolName},${posName},${posName}+${lenName}-1) local ${outName}="" for ${jName}=1,${lenName} do ${outName}=${outName}..${charName}((${byteName}(${strName},${jName})-${keyName}-${jName})%256) end return ${outName} end `;
+    prefix+='local '+envName+'=_ENV or _G ';
+    prefix+='local '+subName+','+byteName+','+charName+'=("").sub,("").byte,("").char ';
+    prefix+='local '+poolName+'="'+poolText+'" ';
+    prefix+='local '+keysName+'={'+keysArr.join(',')+'} ';
+    prefix+='local '+offsName+'={'+offsetsArr.join(',')+'} ';
+    if(opts.antiDebug)prefix+='do local '+okName+','+hkName+','+mkName+'=pcall(function()return debug and debug.gethook and debug.gethook()end)if '+okName+' and '+hkName+' and type('+mkName+')=="string" and #'+mkName+'>0 then do return end end end ';
+    if(opts.antiTamper)prefix+='do local '+sumName+'=0 for '+siName+'=1,#'+poolName+' do '+sumName+'=('+sumName+'+'+byteName+'('+poolName+','+siName+'))%251 end if '+sumName+'~='+cs+' then do return end end end ';
+    prefix+='local function '+decName+'('+idxName+') local '+posName+','+lenName+'='+offsName+'['+idxName+'*2-1],'+offsName+'['+idxName+'*2] local '+keyName+'='+keysName+'['+idxName+'] local '+strName+'='+subName+'('+poolName+','+posName+','+posName+'+'+lenName+'-1) local '+outName+'="" for '+jName+'=1,'+lenName+' do '+outName+'='+outName+'..'+charName+'(('+byteName+'('+strName+','+jName+')-'+keyName+'-'+jName+')%256) end return '+outName+' end ';
   }
-
   let code=prefix+body;
   if(opts.wrapIIFE)code=wrapIIFE(code);
   return code
 }
 
-/* ============================================================
-   PIPELINE HTML
-   ============================================================ */
 function obfuscateHTML(source,opts){
   let html=source;
-
-  if(opts.removeComments){
-    html=html.replace(/<!--[\s\S]*?-->/g,'');
-  }
-
+  if(opts.removeComments){html=html.replace(/\x3c!--[\s\S]*?--\x3e/g,'')}
   if(opts.encodeScripts){
-    html=html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi,(m,attrs,content)=>{
+    const scriptRe=/\x3cscript\b([^\x3e]*)\x3e([\s\S]*?)\x3c\/script\x3e/gi;
+    html=html.replace(scriptRe,(m,attrs,content)=>{
       if(!content.trim())return m;
       const bytes=new TextEncoder().encode(content);
       const arr=Array.from(bytes).join(',');
-      const loader=`eval(new TextDecoder().decode(new Uint8Array([${arr}])))`;
-      return `<script${attrs}>${loader}</script>`;
+      const loader='eval(new TextDecoder().decode(new Uint8Array(['+arr+'])))';
+      return '\x3cscript'+attrs+'\x3e'+loader+'\x3c/script\x3e';
     });
   }
-
   if(opts.encodeText){
-    html=html.replace(/>([^<]+)</g,(m,text)=>{
+    html=html.replace(/\x3e([^\x3c]+)\x3c/g,(m,text)=>{
       if(/^\s*$/.test(text))return m;
-      if(/^(script|style)$/i.test(m))return m;
-      const enc=text.split('').map(c=>{
-        const code=c.charCodeAt(0);
-        if(code<32||code>126)return `&#${code};`;
-        return `&#${code};`;
-      }).join('');
-      return `>${enc}<`;
+      const enc=text.split('').map(c=>'&#'+c.charCodeAt(0)+';').join('');
+      return '\x3e'+enc+'\x3c';
     });
   }
-
   if(opts.encodeAttrs){
     html=html.replace(/\b(href|src|action|alt|title|data-[a-z-]+)\s*=\s*"([^"]*)"/gi,(m,attr,val)=>{
       if(!val.trim())return m;
-      const enc=val.split('').map(c=>`&#${c.charCodeAt(0)};`).join('');
-      return `${attr}="${enc}"`;
+      const enc=val.split('').map(c=>'&#'+c.charCodeAt(0)+';').join('');
+      return attr+'="'+enc+'"';
     });
   }
-
-  if(opts.minify){
-    html=html.replace(/>\s+</g,'><').replace(/\s{2,}/g,' ').trim();
-  }
-
+  if(opts.minify){html=html.replace(/\x3e\s+\x3c/g,'\x3e\x3c').replace(/\s{2,}/g,' ').trim()}
   if(opts.junk){
     const n=2+Math.floor(Math.random()*3);
     let junk='';
     for(let i=0;i<n;i++){
       const id='_x'+Math.floor(Math.random()*0xFFFFFF).toString(16);
-      junk+=`<div style="display:none" data-${id}="${Math.random().toString(36).slice(2)}"></div>`;
+      junk+='\x3cdiv style="display:none" data-'+id+'="'+Math.random().toString(36).slice(2)+'"\x3e\x3c/div\x3e';
     }
     html=junk+html;
   }
-
   return html
 }
 
-/* ============================================================
-   TOKENIZER JAVA
-   ============================================================ */
 function tokenizeJava(code){
   const tokens=[];let i=0;const n=code.length;
   while(i<n){
@@ -1050,11 +947,7 @@ function tokenizeJava(code){
       while(i<n){if(code[i]==='\\'){i+=2;continue}if(code[i]===q){i++;break}if(code[i]==='\n')break;i++}
       const raw=code.substring(s,i);
       const isStr=q==='"';
-      tokens.push({
-        type:isStr?'string':'char',
-        raw,
-        content:isStr?decodeJavaString(raw):null
-      });
+      tokens.push({type:isStr?'string':'char',raw,content:isStr?decodeJavaString(raw):null});
       continue
     }
     if(/[0-9]/.test(c)){
@@ -1071,9 +964,7 @@ function tokenizeJava(code){
     }
     const multiOps=['>>>=','<<=','>>=','>>>','++','--','==','!=','<=','>=','&&','||','+=','-=','*=','/=','%=','&=','|=','^=','::','->','...'];
     let matched=false;
-    for(const op of multiOps){
-      if(code.startsWith(op,i)){tokens.push({type:'op',value:op});i+=op.length;matched=true;break}
-    }
+    for(const op of multiOps){if(code.startsWith(op,i)){tokens.push({type:'op',value:op});i+=op.length;matched=true;break}}
     if(matched)continue;
     tokens.push({type:'op',value:c});i++
   }
@@ -1101,34 +992,26 @@ function tokenValJava(t){
   if(t.type==='char')return t.encoded||t.raw;
   return t.value!==undefined?t.value:(t.raw||'')
 }
-
-/* ============================================================
-   PIPELINE JAVA
-   ============================================================ */
 function obfuscateJava(source,opts){
   let tokens=tokenizeJava(source);
-
   if(opts.removeComments)tokens=tokens.filter(t=>t.type!=='comment');
-
   if(opts.encodeStrings){
     for(const t of tokens){
       if(t.type!=='string')continue;
       const chars=[];
       for(let i=0;i<t.content.length;i++)chars.push(t.content.charCodeAt(i));
-      t.encoded=`new String(new char[]{${chars.join(',')}})`;
+      t.encoded='new String(new char[]{'+chars.join(',')+'})';
     }
   }
-
   if(opts.encodeChars){
     for(const t of tokens){
       if(t.type!=='char')continue;
       if(t.raw.length>=3){
         const code=t.raw.charCodeAt(1);
-        t.encoded=`(char)${code}`;
+        t.encoded='(char)'+code;
       }
     }
   }
-
   if(opts.encodeNumbers){
     for(const t of tokens){
       if(t.type!=='number')continue;
@@ -1136,10 +1019,9 @@ function obfuscateJava(source,opts){
       const n=parseInt(t.value,10);
       if(n<0||n>1e6)continue;
       const r=1+Math.floor(Math.random()*500);
-      t.value=`(${n}+${r}-${r})`;
+      t.value='('+n+'+'+r+'-'+r+')';
     }
   }
-
   let code;
   if(opts.minify){
     let out='',prev=null;
@@ -1160,13 +1042,9 @@ function obfuscateJava(source,opts){
   }else{
     code=tokens.map(tokenValJava).join('');
   }
-
   return code
 }
 
-/* ============================================================
-   UI GERAL
-   ============================================================ */
 const input=document.getElementById('input');
 const output=document.getElementById('output');
 const statusEl=document.getElementById('status');
@@ -1177,15 +1055,15 @@ const runBtn=document.getElementById('runBtn');
 
 function updateInStats(){
   const v=input.value;const lines=v?v.split('\n').length:0;
-  inStats.textContent=`${v.length} caracteres · ${lines} linhas`
+  inStats.textContent=v.length+' characters · '+lines+' lines'
 }
 function updateOutStats(){
   const v=output.textContent;const filled=output.classList.contains('filled');
   const lines=filled?v.split('\n').length:0;
-  outStats.textContent=`${filled?v.length:0} caracteres · ${lines} linhas`;
+  outStats.textContent=(filled?v.length:0)+' characters · '+lines+' lines';
   if(input.value.length&&filled){
     const r=Math.round((v.length/input.value.length)*100);
-    ratio.textContent=`${r>=100?'+':''}${r-100}%`;
+    ratio.textContent=(r>=100?'+':'')+(r-100)+'%';
     ratio.style.color=r>100?'var(--text-mute)':'var(--success)'
   }else ratio.textContent=''
 }
@@ -1195,9 +1073,9 @@ function getToggle(id){const el=document.getElementById(id);return el?el.checked
 
 function runObfuscate(){
   const code=input.value;
-  if(!code.trim()){showStatus('Cole algum código primeiro','err');return}
+  if(!code.trim()){showStatus('Paste some code first','err');return}
   runBtn.classList.add('running');runBtn.disabled=true;
-  showStatus('Processando...','');
+  showStatus('Processing...','');
   requestAnimationFrame(()=>setTimeout(()=>{
     const t0=performance.now();
     try{
@@ -1240,10 +1118,10 @@ function runObfuscate(){
       const dt=Math.round(performance.now()-t0);
       output.textContent=result;
       output.classList.add('filled');
-      showStatus(`Ofuscado em ${dt}ms`,dt>500?'warn':'ok');
+      showStatus('Obfuscated in '+dt+'ms',dt>500?'warn':'ok');
       updateOutStats()
     }catch(e){
-      console.error(e);showStatus('Erro: '+e.message,'err')
+      console.error(e);showStatus('Error: '+e.message,'err')
     }finally{
       runBtn.classList.remove('running');runBtn.disabled=false
     }
@@ -1261,8 +1139,8 @@ function showStatus(msg,type){
 function copyOutput(){
   if(!output.classList.contains('filled'))return;
   navigator.clipboard.writeText(output.textContent)
-    .then(()=>toast('Copiado para a área de transferência','success'))
-    .catch(()=>toast('Falha ao copiar','error'))
+    .then(()=>toast('Copied to clipboard','success'))
+    .catch(()=>toast('Failed to copy','error'))
 }
 function downloadOutput(){
   if(!output.classList.contains('filled'))return;
@@ -1271,22 +1149,21 @@ function downloadOutput(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.download='obfuscated'+cfg.ext;a.click();
-  URL.revokeObjectURL(url);toast('Arquivo baixado','success')
+  URL.revokeObjectURL(url);toast('File downloaded','success')
 }
-
 function loadExample(){
   input.value=LANGS[currentLang].example;
   updateInStats();
-  toast('Exemplo carregado','success')
+  toast('Example loaded','success')
 }
 function clearInput(){
   input.value='';
   updateInStats();
-  output.textContent='Aguardando ofuscação...';
+  output.textContent='Waiting for obfuscation...';
   output.classList.remove('filled');
-  outStats.textContent='0 caracteres · 0 linhas';
+  outStats.textContent='0 characters · 0 lines';
   ratio.textContent='';
-  toast('Campo limpo','success')
+  toast('Field cleared','success')
 }
 
 let toastTimer;
@@ -1311,14 +1188,9 @@ document.addEventListener('keydown',(e)=>{
   }
 });
 
-/* ============================================================
-   INICIALIZAÇÃO
-   ============================================================ */
 document.getElementById('year').textContent = new Date().getFullYear();
 renderDropdown();
-(function init(){
-  selectLang('lua');
-})();
+selectLang('lua');
 </script>
 </body>
 </html>
